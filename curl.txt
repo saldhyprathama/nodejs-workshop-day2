@@ -1,0 +1,43 @@
+1. Auth
+# Register
+curl -s -X POST http://localhost:3000/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Alice","email":"alice@example.com","password":"secret123"}' | jq
+
+# Login → copy the access_token
+curl -s -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"alice@example.com","password":"secret123"}' | jq
+
+2. Post
+export TOKEN="paste_access_token_here"
+
+# List all posts (public)
+curl -s http://localhost:3000/posts | jq
+
+# Get one post (public)
+curl -s http://localhost:3000/posts/1 | jq
+
+# Create post (JWT required)
+curl -s -X POST http://localhost:3000/posts \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"title":"Hello NestJS","body":"Guards, DI, and Prisma in action!"}' | jq
+
+# Delete own post (JWT required)
+curl -s -X DELETE http://localhost:3000/posts/1 \
+  -H "Authorization: Bearer $TOKEN" | jq
+
+# Try deleting without token → 401
+curl -s -X DELETE http://localhost:3000/posts/1 | jq
+
+3. PDF
+# Download post as PDF (JWT required) — saved to file
+curl -s http://localhost:3000/pdf/post/1 \
+  -H "Authorization: Bearer $TOKEN" \
+  --output post-1.pdf
+
+open post-1.pdf
+
+# Try without token → 401
+curl -s http://localhost:3000/pdf/post/1 | jq
