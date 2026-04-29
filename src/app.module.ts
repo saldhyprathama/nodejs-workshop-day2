@@ -1,4 +1,5 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
@@ -6,6 +7,8 @@ import { AuthModule } from './auth/auth.module';
 import { PostsModule } from './posts/posts.module';
 import { PdfModule } from './pdf/pdf.module';
 import { LoggerMiddleware } from './common/logger.middleware';
+import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 
 /**
  * 🏗 Root Module — AppModule
@@ -27,7 +30,26 @@ import { LoggerMiddleware } from './common/logger.middleware';
     PdfModule, // Worker threads PDF generation
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    /**
+     * APP_FILTER — global exception filter (wired via DI, not useGlobalFilters).
+     * This allows the filter to have its own injected dependencies.
+     * PrismaExceptionFilter maps Prisma error codes → HTTP status codes.
+     */
+    {
+      provide: APP_FILTER,
+      useClass: PrismaExceptionFilter,
+    },
+    /**
+     * APP_INTERCEPTOR — global response wrapper.
+     * Every successful response is shaped as { statusCode, data, timestamp }.
+     */
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseInterceptor,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   /**

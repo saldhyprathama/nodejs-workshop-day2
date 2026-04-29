@@ -15,4 +15,13 @@ export class PostsService {
       orderBy: { createdAt: 'desc' },
     });
   }
+
+  async findOne(id: number) {
+    const post = await this.prisma.post.findUnique({
+      where: { id },
+      include: { author: { select: { id: true, name: true, email: true } } },
+    });
+    // if (!post) throw new NotFoundException(`Post #${id} not found`);
+    return post;
+  }
 }
