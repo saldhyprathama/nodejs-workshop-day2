@@ -1,0 +1,57 @@
+ 🏋️  WORKSHOP CHALLENGE — Posts Module
+  Complete the missing endpoints & service methods
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FILES TO EDIT:
+  src/posts/posts.controller.ts
+  src/posts/posts.service.ts
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  TASK 1 — GET /posts/:id
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Controller:
+  - Add a new GET route that accepts an :id param
+  - Use ParseIntPipe to convert the param to a number
+  - Call the service method and return the result
+
+Service:
+  - Use prisma.post.findUnique() to get a single post
+  - Include the author (id, name, email)
+  - If not found → throw NotFoundException
+
+Hint: NotFoundException is from @nestjs/common
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  TASK 2 — POST /posts  (JWT protected)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Controller:
+  - Add @UseGuards(JwtAuthGuard) to protect this route
+  - Read the body using CreatePostDto
+  - Get the logged-in user's id from req.user.id
+  - Pass both to the service
+
+Service:
+  - Use prisma.post.create() with { title, body, authorId }
+  - Include the author (id, name) in the result
+  - Log a message after creation using this.logger.log()
+
+Hint: CreatePostDto already exists in posts.dto.ts
+Hint: req.user.id is available because JwtAuthGuard injects it
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  TASK 3 — DELETE /posts/:id  (JWT protected)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Controller:
+  - Protect with @UseGuards(JwtAuthGuard)
+  - Accept :id param with ParseIntPipe
+  - Pass id and req.user.id to the service
+
+Service:
+  - First call findOne(id) to check the post exists
+  - Check if post.authorId === requesterId
+  - If not → throw NotFoundException (don't reveal it's forbidden)
+  - Delete with prisma.post.delete()
+  - Return { message: `Post #${id} deleted` }
