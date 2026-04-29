@@ -9,3 +9,11 @@ export class CreatePostDto {
   @MinLength(5)
   body: string;
 }
+
+export interface AuthenticatedRequest extends Request {
+  user: {
+    id: number;
+    email: string;
+    role: string;
+  };
+}
